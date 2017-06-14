@@ -1,0 +1,7 @@
+﻿  Source.cpp
+c:\users\morelloblizzard\documents\visual studio 2017\projects\project3\project3\source.cpp(39): warning C4018: '<': signed/unsigned mismatch
+c:\users\morelloblizzard\documents\visual studio 2017\projects\project3\project3\source.cpp(87): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+c:\users\morelloblizzard\documents\visual studio 2017\projects\project3\project3\source.cpp(116): warning C4018: '<': signed/unsigned mismatch
+c:\users\morelloblizzard\documents\visual studio 2017\projects\project3\project3\source.cpp(343): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+  Project3.vcxproj -> C:\Users\MorelloBlizzard\documents\visual studio 2017\Projects\Project3\Debug\Project3.exe
+  Project3.vcxproj -> C:\Users\MorelloBlizzard\documents\visual studio 2017\Projects\Project3\Debug\Project3.pdb (Partial PDB)

@@ -43,27 +43,29 @@ int space(Grid* cells, int k, int column) //a help function which makes the grid
 }
 
 
-int maxCol(fstream& file)  // a function which counts how many commas
+int maxCol(fstream& file)  // a function which commas how many commas
 {                         //are found and returns the number of commas
 	char ch;              // of the line with maximum commas
 	int max = 0;
-	int count = 0;
+	int comma = 0;
 	file.clear();
 	file.seekg(0, file.beg);
 	while (file)
 	{
 		ch = file.get();
 		if (ch == '\n')
-			count = 0;
+			comma = 0;
 		if (ch == ',')
-			count++;
-		if (count > max)
-			max = count;
+			comma++;
+		if (comma > max)
+			max = comma;
+		if (ch == '\\')
+			ch = file.get();
 	}
 	return max;
 }
 double calculator(double number1, double number2, char operation) // calculator which
-{                                                                 // does the basic operations
+{                                                                 // performs the basic operations
 	switch (operation)
 	{
 	case '+':return number1 + number2; break;
@@ -77,8 +79,8 @@ double calculator(double number1, double number2, char operation) // calculator 
 	}
 	return 0;
 }
-char* convertTochar(double n, Grid cell) // a function which convert a double number 
-{                                        // to a char* 
+char* convertTochar(double n, Grid cell) // a function which convert a double/int number 
+{                                        // to a string 
 	ofstream otmp(Tmp_fileName);
 	otmp << n;
 	otmp.close();
@@ -181,6 +183,7 @@ void calculateCells(Grid* cells, int k) //function which check if a cell contain
 			else
 			{
 				double n = calculator(number1, number2, operation);
+				if (n == 0) n = 0;
 				cells[i].setContent(convertTochar(n, cells[i]));
 			}
 		}
@@ -320,7 +323,7 @@ int execute_command(int command, fstream& file,  const char file_name[], int k, 
 	}
 	return 0;
 }
-void start(fstream& file, char fileName[MAX]) //initicialization of the file
+void start(fstream& file, char fileName[MAX]) //inititialization of the file
 {
 	cout << "File name: ";
 	cin.getline(fileName, MAX);
@@ -348,15 +351,14 @@ int main()
 		cout << "The file is empty!" << endl;
 		return 0;
 	}
-	bool quotes = true;
+	bool isString;
 	int columns = maxCol(file);
 	file.clear();
 	file.seekg(0, file.beg);
 	Grid* cells = new Grid[length + 1];
-	int count = 0;
-	//counts how many times a comma is found
+	int comma = 0;	//commas how many times a comma is found
 	int column = 1, row = 1;
-	bool type = true;
+	bool isNumber;
 	char ch;
 	int j = 0, k = 0;
 	char* buff = new char[length + 1]; //a temporary buffer which is used
@@ -368,30 +370,30 @@ int main()
 		
 		if (ch == '"' && j == 0)
 		{
-			type = false;
+			isNumber = false;
+			isString = false;
 			ch = file.get();
 		}
 		else if (j == 0)
-			type = true;
-		if (file.peek() == ',' && ch != '"' && !type)
-		{
-			quotes = false;
-			type = true;
-		}
-			 if (ch == '\\')
-		{
-			if (file.peek() == '"')
-				ch = file.get();
-		}
-		if (ch != ',' && ch != ' ' && ch != '\n')// && length != file.tellg()) 
+			isNumber = true;
+		if (ch == '\\')
+			ch = file.get();
+		if (file.peek() == ',' && ch != '"' && isNumber==false)
+			isNumber = true;
+		else if (ch == '"' && isNumber == false)
+			isString = true;
+
+		if ((ch != ',' && ch != ' ' && ch != '\n' && ch != '"')
+			|| isNumber == false && (ch == ' ' || isString == false && (ch == ',' || ch == '"')))
 		{
 			buff[j] = ch;
 			j++;
-
+			if (ch == ',')
+				ch = file.get();
 		}
 		if (ch == ',')
 		{
-			count++;
+			comma++;
 			if (j != 0)
 			{
 				buff[j] = { '\0' };
@@ -403,12 +405,12 @@ int main()
 			}
 			cells[k].setRow(row);
 			cells[k].setColumn(column);
-			if (type == true)
-				if (cells[k].checkStr(cells[k]) == false || quotes==false)
+			if (isNumber == true)
+				if (cells[k].checkStr(cells[k]) == false || isString==false)
 				{
 					cells[k].printError();
 					error = true;
-					quotes = true;
+					isString = true;
 				}
 
 			++column;
@@ -418,43 +420,44 @@ int main()
 		if (ch == '\n' || length == file.tellg())
 		{
 
-			if (j != 0 || (j == 0 && count == columns))
+			if (j != 0 || (j == 0 && comma == columns))
 			{
 				buff[j] = { '\0' };
 				cells[k].setContent(buff);
 				cells[k].setRow(row);
 				cells[k].setColumn(column);
-				if (type == true)
-					if (cells[k].checkStr(cells[k]) == false || quotes==false)
+				if (isNumber == true)
+					if (cells[k].checkStr(cells[k]) == false || isString==false)
 					{
 						cells[k].printError();
 						error = true;
-						quotes = true;
+						isString = true;
 					}
 				
 				column++;
-				count++;
+				comma++;
 				k++;
 				j = 0;
 
 			}
 			if (j == 0)
 			{
-				while (count <= columns)
+				while (comma <= columns)
 				{
 					cells[k].setContent("");
 					cells[k].setRow(row);
 					cells[k].setColumn(column);
 					column++;
-					count++;
+					comma++;
 					k++;
 				}
 			}
 			column = 1;
-			count = 0;
+			comma = 0;
 			row++;
 		}
 	}
+	
 	if (error == true)
 	{
 		system("pause");
@@ -471,6 +474,7 @@ int main()
 			command = 0;
 		result = execute_command(command, file, fileName, k, cells);
 	} while (result == 0);
+	
 	
 	system("pause");
 	return 0;

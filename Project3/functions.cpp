@@ -63,17 +63,25 @@ Grid::~Grid()
 	delete[] content;
 }
 
-bool Grid::checkStr(Grid cell)
-{
-		int count = 0;
-		for (int i = 0; i < strlen(cell.getContent()); i++)
+bool Grid::checkStr(Grid cell) // this function checks if the content of the cell
+                               // has any error in it
+{                              // returns false if is of uknown data 
+	                           // and otherwise it returns true
+		int comma = 0;
+		int i = 0;
+		if (cell.getContent()[0] == '+' || cell.getContent()[0] == '-')
+			i++;
+		for (i; i < strlen(cell.getContent()); i++)
 		{
-			if ((cell.getContent()[i]<'0' || cell.getContent()[i]>'9'  )&& cell.getContent()[i] != '.' && cell.getContent()[0]!='=' || cell.getContent()[0] == '.')
+		
+			if ((cell.getContent()[i]<'0' || cell.getContent()[i]>'9') && cell.getContent()[0]!='=' 
+				&& cell.getContent()[i] != '.'
+				||	cell.getContent()[0] == '.' )
 				return false;
 			if (cell.getContent()[i] == '.')
-				count++;
+				comma++;
 		}
-		if (count > 1)
+		if (comma > 1)
 			return false;
 		return true;
 }
